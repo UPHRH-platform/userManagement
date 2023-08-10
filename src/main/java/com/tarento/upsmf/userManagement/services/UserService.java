@@ -11,6 +11,7 @@ import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.*;
 import java.nio.charset.StandardCharsets;
@@ -90,16 +91,8 @@ public class UserService {
         ResponseEntity<JsonNode> result = restTemplate.postForEntity(uri,httpEntity,JsonNode.class);
         return result;
     }
-    public ResponseEntity<JsonNode> sendOtp(int phoneNumber) throws URISyntaxException {
-        logger.info("sending otp...");
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json; charset=utf8");
-        headers.add("Accept", "application/json");
-
-        HttpClient httpClient = HttpClientBuilder.create().build();
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        restTemplate.setRequestFactory(requestFactory);
+    public ResponseEntity<String> getOtp(String phoneNumber) throws URISyntaxException {
+        logger.info("getting otp...");
 
         String baseUrl = "";
         String username = "";
@@ -110,16 +103,20 @@ public class UserService {
         String msgType = "TXT";
         String response = "Y";
 
-        String payload = "username=" + URLEncoder.encode(username, StandardCharsets.UTF_8)
-                + "&pass=" + URLEncoder.encode(password, StandardCharsets.UTF_8)
-                + "&senderid=" + URLEncoder.encode(senderId, StandardCharsets.UTF_8)
-                + "&message=" + URLEncoder.encode(message, StandardCharsets.UTF_8)
-                + "&dest_mobileno=" + URLEncoder.encode(String.valueOf(phoneNumber), StandardCharsets.UTF_8)
-                + "&msgtype=" + URLEncoder.encode(msgType, StandardCharsets.UTF_8)
-                + "&response=" + URLEncoder.encode(response, StandardCharsets.UTF_8);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                .queryParam("username", username)
+                .queryParam("pass", password)
+                .queryParam("senderid", senderId)
+                .queryParam("message", message)
+                .queryParam("dest_mobileno", String.valueOf(phoneNumber))
+                .queryParam("msgtype", msgType)
+                .queryParam("response", response);
 
-        HttpEntity<String> httpEntity = new HttpEntity<>(payload, headers);
-        ResponseEntity<JsonNode> result = restTemplate.exchange(baseUrl, HttpMethod.GET, httpEntity, JsonNode.class);
+        URI uri = builder.build().encode().toUri();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Accept", "application/json");
+        HttpEntity<?> httpEntity = new HttpEntity<>(headers);
+        ResponseEntity<String> result = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
         return result;
     }
 }
