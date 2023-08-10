@@ -12,8 +12,8 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class UserService {
@@ -88,6 +88,38 @@ public class UserService {
         HttpHeaders headers = getHeader();
         HttpEntity httpEntity = new HttpEntity(body, headers);
         ResponseEntity<JsonNode> result = restTemplate.postForEntity(uri,httpEntity,JsonNode.class);
+        return result;
+    }
+    public ResponseEntity<JsonNode> sendOtp(int phoneNumber) throws URISyntaxException {
+        logger.info("sending otp...");
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json; charset=utf8");
+        headers.add("Accept", "application/json");
+
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        restTemplate.setRequestFactory(requestFactory);
+
+        String baseUrl = "";
+        String username = "";
+        String password = "";
+        String senderId = "";
+        String message = "Hello abc, Your OTP is 1234 sfasa, Lucknow";
+        String destMobileNo = "";
+        String msgType = "TXT";
+        String response = "Y";
+
+        String payload = "username=" + URLEncoder.encode(username, StandardCharsets.UTF_8)
+                + "&pass=" + URLEncoder.encode(password, StandardCharsets.UTF_8)
+                + "&senderid=" + URLEncoder.encode(senderId, StandardCharsets.UTF_8)
+                + "&message=" + URLEncoder.encode(message, StandardCharsets.UTF_8)
+                + "&dest_mobileno=" + URLEncoder.encode(String.valueOf(phoneNumber), StandardCharsets.UTF_8)
+                + "&msgtype=" + URLEncoder.encode(msgType, StandardCharsets.UTF_8)
+                + "&response=" + URLEncoder.encode(response, StandardCharsets.UTF_8);
+
+        HttpEntity<String> httpEntity = new HttpEntity<>(payload, headers);
+        ResponseEntity<JsonNode> result = restTemplate.exchange(baseUrl, HttpMethod.GET, httpEntity, JsonNode.class);
         return result;
     }
 }

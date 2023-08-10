@@ -5,6 +5,7 @@ import com.tarento.upsmf.userManagement.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+
 import java.net.URISyntaxException;
 
 @Component
@@ -31,6 +32,9 @@ public class UserHandler {
 
     public ResponseEntity<JsonNode>  deactivateUser(final JsonNode body) throws URISyntaxException{
         return userService.deactivateUser(body);
+    }
+    public ResponseEntity<JsonNode>  sendOtp(int  phoneNumber) throws URISyntaxException {
+        return userService.sendOtp(phoneNumber);
     }
 
 }
