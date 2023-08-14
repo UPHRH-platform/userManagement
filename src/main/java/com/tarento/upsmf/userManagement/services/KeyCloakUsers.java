@@ -26,13 +26,13 @@ public class KeyCloakUsers {
     public javax.ws.rs.core.Response createUser(final KeyCloakUserDTO keyCloakUserDTO){
         Keycloak keycloakInstance = keycloakConfig.getKeycloakInstance();
         UserRepresentation newUser = createUserRepresentation(keyCloakUserDTO);
-        UsersResource usersResource = keycloakInstance.realm(keycloakConfig.getRealm()).users();
+        UsersResource usersResource = keycloakInstance.realm("sunbird-rc").users();
         return usersResource.create(newUser);
     }
 
     public void updateUser(final KeyCloakUserDTO keyCloakUserDTO)  {
         Keycloak keycloakInstance = keycloakConfig.getKeycloakInstance();
-        UserResource userResource = keycloakInstance.realm(keycloakConfig.getRealm()).users().get(keyCloakUserDTO.getUsername());
+        UserResource userResource = keycloakInstance.realm("sunbird-rc").users().get(keyCloakUserDTO.getUsername());
         UserRepresentation user = userResource.toRepresentation();
         /*
         * update user information here
@@ -42,19 +42,19 @@ public class KeyCloakUsers {
 
     public List<UserRepresentation> listUser() {
         Keycloak keycloakInstance = keycloakConfig.getKeycloakInstance();
-        return keycloakInstance.realm(keycloakConfig.getRealm()).users().list();
+        return keycloakInstance.realm("sunbird-rc").users().list();
     }
 
     public void activateUser(final String userName){
         Keycloak keycloakInstance = keycloakConfig.getKeycloakInstance();
-        UserResource userResource = keycloakInstance.realm(keycloakConfig.getRealm()).users().get(userName);
+        UserResource userResource = keycloakInstance.realm("sunbird-rc").users().get(userName);
         UserRepresentation user = userResource.toRepresentation();
         user.setEnabled(true);
     }
 
     public void deactivateUser(final String userName) {
         Keycloak keycloakInstance = keycloakConfig.getKeycloakInstance();
-        UserResource userResource = keycloakInstance.realm(keycloakConfig.getRealm()).users().get(userName);
+        UserResource userResource = keycloakInstance.realm("sunbird-rc").users().get(userName);
         UserRepresentation user = userResource.toRepresentation();
         user.setEnabled(false);
     }
