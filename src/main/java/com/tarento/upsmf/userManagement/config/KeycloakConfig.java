@@ -18,31 +18,31 @@ import org.springframework.stereotype.Component;
 public class KeycloakConfig {
 
     //To be appended with /auth if keycloak version is less than 17
-    @Value("${keycloak.auth-server-url}")
-    private String serverUrl;
+    //@Value("${keycloak.auth-server-url}")
+    private String serverUrl="http://localhost:8080/auth";
 
-    @Value("${keycloak.realm}")
-    private String realm;
+    //@Value("${keycloak.realm}")
+    private String realm="sunbird-rc";
 
-    @Value("${keycloak.client-id}")
-    private String clientId;
+    //@Value("${keycloak.client-id}")
+    private String clientId="admin-api";
 
-    @Value("${keycloak.credentials.secret}")
-    private String clientSecret;
+    //@Value("${keycloak.credentials.secret}")
+    private String clientSecret="78712b5a-db33-4de6-9409-c84c9da33f1a";
 
-    @Value("${keycloak.admin-username}")
-    private String userName;
+    //@Value("${keycloak.admin-username}")
+    private String userName="admin";
 
-    @Value("${keycloak.admin-password}")
-    private String password;
+    //@Value("${keycloak.admin-password}")
+    private String password="admin";
 
-    @Value("${keycloak.grant-type}")
-    private String grantType;
+    //@Value("${keycloak.grant-type}")
+    private String grantType="password";
 
     Keycloak keycloak = null;
 
     public Keycloak getKeycloakInstance() {
-        log.info("keycloak real {} and server url {} .", realm, serverUrl);
+        //log.info("keycloak real {} and server url {} .", realm, serverUrl);
         if (null == keycloak) {
             keycloak = KeycloakBuilder.builder()
                     .serverUrl(serverUrl)

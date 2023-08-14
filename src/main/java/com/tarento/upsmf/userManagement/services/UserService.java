@@ -24,10 +24,10 @@ public class UserService {
     private Environment env;
 
 
-
     private final RestTemplate restTemplate = new RestTemplate();
-    final String BASE_URL = env.getProperty("BaseURL");
-    final String KEYCLOAK_BASE_URL = env.getProperty("keycloak_BaseURL");
+    final String BASE_URL = "https://uphrh.in/api";
+    final String KEYCLOAK_BASE_URL = "http://localhost:8080/auth";
+
 
     private HttpHeaders getHeader(){
         HttpHeaders headers = new HttpHeaders();
@@ -55,9 +55,6 @@ public class UserService {
         HttpHeaders headers = getHeader();
         HttpEntity<JsonNode> httpEntity = new HttpEntity(body, headers);
         ResponseEntity<JsonNode> result = restTemplate.postForEntity(uri1,httpEntity,JsonNode.class);
-        URI uri2 = new URI(KEYCLOAK_BASE_URL + "/v1/keycloak/user/create");
-        HttpHeaders headerForKeycloak = getHeader();
-        ResponseEntity<JsonNode> result2 = restTemplate.postForEntity(uri2,httpEntity,JsonNode.class);
         return result;
     }
 
