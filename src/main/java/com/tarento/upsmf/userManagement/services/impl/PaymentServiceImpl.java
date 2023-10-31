@@ -116,10 +116,14 @@ public class PaymentServiceImpl implements PaymentService {
         httpHeaders.set("x-authenticated-user-token", EXAMS_AUTH_TOKEN);
         HttpEntity<String> entity = new HttpEntity<String>(referenceNo, httpHeaders);
         logger.info("exam url - {}", FEE_STATUS_UPDATE_ENDPOINT);
-        ResponseEntity<ResponseDto> responseEntity = restTemplate.postForObject(FEE_STATUS_UPDATE_ENDPOINT, entity, ResponseEntity.class);
-        logger.info("Update student fee status - {}", responseEntity);
-        if(responseEntity != null && responseEntity.getStatusCode() == HttpStatus.OK) {
-            logger.info("Student Fee updated successfully");
+        try {
+            ResponseEntity responseEntity = restTemplate.postForObject(FEE_STATUS_UPDATE_ENDPOINT, entity, ResponseEntity.class);
+            logger.info("Update student fee status - {}", responseEntity);
+            if (responseEntity != null && responseEntity.getStatusCode() == HttpStatus.OK) {
+                logger.info("Student Fee updated successfully");
+            }
+        } catch (Exception e) {
+            logger.error("Error in processing request ");
         }
     }
 
