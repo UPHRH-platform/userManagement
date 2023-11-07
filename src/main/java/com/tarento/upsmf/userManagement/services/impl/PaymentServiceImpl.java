@@ -44,6 +44,7 @@ public class PaymentServiceImpl implements PaymentService {
     private String AFFILIATION_PAYMENT_GATEWAY_ENDPOINT;
     private String EXAM_PAYMENT_GATEWAY_ENDPOINT;
     private String FEE_STATUS_UPDATE_ENDPOINT;
+    private String RETOTALING_FEE_STATUS_UPDATE_ENDPOINT;
     private String EXAMS_AUTH_TOKEN;
     private String AES_KEY_FOR_PAYMENT_SUCCESS;
 
@@ -58,6 +59,7 @@ public class PaymentServiceImpl implements PaymentService {
         AES_KEY_FOR_PAYMENT_SUCCESS = getPropertyValue("aes_key_for_payment_success");
         EXAM_PAYMENT_GATEWAY_ENDPOINT = getPropertyValue("exam_payment_Gateway_EndPoint");
         FEE_STATUS_UPDATE_ENDPOINT = getPropertyValue("exam_fee_status_update_EndPoint");
+        RETOTALING_FEE_STATUS_UPDATE_ENDPOINT = getPropertyValue("retotaling_fee_status_update_EndPoint");
         EXAMS_AUTH_TOKEN = getPropertyValue("exam_service_auth_token");
     }
 
@@ -79,12 +81,18 @@ public class PaymentServiceImpl implements PaymentService {
                 strEndPoint = REGISTRATION_PAYMENT_GATEWAY_ENDPOINT;
             } else if (strings.contains("affiliation")) {
                 strEndPoint = AFFILIATION_PAYMENT_GATEWAY_ENDPOINT;
-            } else if(strings.contains("exam") || strings.contains("EXAM")) {
+            } else if(strings.contains("exam_institute") || strings.contains("EXAM_INSTITUTE")) {
                 strEndPoint = EXAM_PAYMENT_GATEWAY_ENDPOINT;
                 // get ref no
                 String referenceNo = requestData.get("ReferenceNo");
                 // update db for provided transaction id
-                updateStudentFeeStatus(referenceNo);
+                updateInstituteFeeStatus(referenceNo);
+            } else if(strings.contains("exam_retotaling") || strings.contains("EXAM_RETOTALING")) {
+                strEndPoint = EXAM_PAYMENT_GATEWAY_ENDPOINT;
+                // get ref no
+                String referenceNo = requestData.get("ReferenceNo");
+                // update db for provided transaction id
+                updateStudentRetotalingFeeStatus(referenceNo);
             }
             String responseString = "", transaction_status = "";
             String transactionDetails = getTransactionDetails(requestData);
@@ -109,7 +117,7 @@ public class PaymentServiceImpl implements PaymentService {
         return new ResponseEntity<String>(null, httpHeaders, HttpStatus.NOT_FOUND);
     }
 
-    private void updateStudentFeeStatus(String referenceNo) {
+    private void updateInstituteFeeStatus(String referenceNo) {
         logger.info("updating student fee for ref - {}", referenceNo);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -123,7 +131,25 @@ public class PaymentServiceImpl implements PaymentService {
                 logger.info("Student Fee updated successfully");
             }
         } catch (Exception e) {
-            logger.error("Error in processing request ");
+            logger.error("Error in updating status for institute exam fee request ");
+        }
+    }
+
+    private void updateStudentRetotalingFeeStatus(String referenceNo) {
+        logger.info("updating student fee for ref - {}", referenceNo);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        httpHeaders.set("x-authenticated-user-token", EXAMS_AUTH_TOKEN);
+        HttpEntity<String> entity = new HttpEntity<String>(referenceNo, httpHeaders);
+        logger.info("exam url - {}", FEE_STATUS_UPDATE_ENDPOINT);
+        try {
+            ResponseEntity responseEntity = restTemplate.postForObject(RETOTALING_FEE_STATUS_UPDATE_ENDPOINT, entity, ResponseEntity.class);
+            logger.info("Update student fee status - {}", responseEntity);
+            if (responseEntity != null && responseEntity.getStatusCode() == HttpStatus.OK) {
+                logger.info("Student Fee updated successfully");
+            }
+        } catch (Exception e) {
+            logger.error("Error in updating status for retotaling request ");
         }
     }
 
