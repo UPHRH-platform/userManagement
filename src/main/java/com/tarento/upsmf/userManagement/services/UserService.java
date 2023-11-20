@@ -1,12 +1,15 @@
 package com.tarento.upsmf.userManagement.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.tarento.upsmf.userManagement.exception.InvalidInputException;
+import com.tarento.upsmf.userManagement.exception.LoginFailedException;
+import com.tarento.upsmf.userManagement.exception.RcUserManagementException;
+import com.tarento.upsmf.userManagement.exception.UserCreationException;
 import com.tarento.upsmf.userManagement.model.Transaction;
 import com.tarento.upsmf.userManagement.repository.TransactionRepository;
-import com.tarento.upsmf.userManagement.utility.KeycloakTokenRetriever;
-import com.tarento.upsmf.userManagement.utility.KeycloakUserCount;
-import com.tarento.upsmf.userManagement.utility.KeycloakUserCredentialPersister;
-import com.tarento.upsmf.userManagement.utility.SunbirdRCKeycloakTokenRetriever;
+import com.tarento.upsmf.userManagement.utility.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
@@ -96,12 +99,16 @@ public class UserService {
     }
 
     public ResponseEntity<JsonNode> createUser(final JsonNode body) throws URISyntaxException {
-        logger.info("Creating user...{} ", body.toPrettyString());
-        URI uri1 = new URI(BASE_URL + "/user/v1/sso/create");
-        HttpHeaders headers = getHeader();
-        HttpEntity<JsonNode> httpEntity = new HttpEntity(body, headers);
-        ResponseEntity<JsonNode> result = restTemplate.postForEntity(uri1,httpEntity,JsonNode.class);
-        return result;
+        try {
+            logger.info("Creating user...{} ", body.toPrettyString());
+            URI uri1 = new URI(BASE_URL + "/user/v1/sso/create");
+            HttpHeaders headers = getHeader();
+            HttpEntity<JsonNode> httpEntity = new HttpEntity(body, headers);
+            ResponseEntity<JsonNode> result = restTemplate.postForEntity(uri1, httpEntity, JsonNode.class);
+            return result;
+        } catch (Exception e) {
+            throw new UserCreationException("User creation failed for sso", ErrorCode.CE_UM_001, e.getMessage());
+        }
     }
 
     public ResponseEntity<JsonNode> updateUser(final JsonNode body) throws URISyntaxException {
@@ -184,10 +191,43 @@ public class UserService {
         RestTemplate restTemplate = new RestTemplate();
         URI uri = new URI(KEYCLOAK_BASEURL + "/user/generateOtp");
         logger.info("login user ...{} ", uri.toString());
+
         HttpHeaders headerForKeycloak = getHeaderForKeycloak();
         HttpEntity httpEntity = new HttpEntity(email, headerForKeycloak);
-        ResponseEntity<String> result = restTemplate.postForEntity(uri,httpEntity,String.class);
-        return result;
+
+        try {
+            ResponseEntity<String> result = restTemplate.postForEntity(uri, httpEntity, String.class);
+            return result;
+        } catch (Exception e) {
+            throw new RcUserManagementException("Unable to get token from RC_UM", ErrorCode.RC_UM_101, e.getMessage());
+        }
+    }
+
+    public Boolean isUserExistInRCUM(JsonNode request) throws URISyntaxException, IOException {
+        JsonNode body = request.get("request");
+
+        if (body.get("email") == null || (body.get("email").asText() != null && body.get("email").asText().isBlank())) {
+            throw new InvalidInputException("Invalid mail id", ErrorCode.CE_UM_002, "Mail id missing or empty while checking");
+        }
+
+        RestTemplate restTemplate = new RestTemplate();
+        URI uri = new URI(KEYCLOAK_BASEURL + "/user/exist");
+        String email = body.get("email").asText();
+
+        ObjectNode usernameNode = JsonNodeFactory.instance.objectNode();
+        usernameNode.put("username",body.get("email"));
+
+        logger.info("login user ...{} ", uri.toString());
+
+        HttpHeaders headerForKeycloak = getHeaderForKeycloak();
+        HttpEntity httpEntity = new HttpEntity(usernameNode, headerForKeycloak);
+
+        try {
+            ResponseEntity<Boolean> result = restTemplate.postForEntity(uri, httpEntity, Boolean.class);
+            return result.getBody();
+        } catch (Exception e) {
+            throw new RcUserManagementException("Unable to check user existance", ErrorCode.RC_UM_004, e.getMessage());
+        }
     }
 
     public ResponseEntity<String> login(final JsonNode body) throws URISyntaxException, IOException {
@@ -197,8 +237,14 @@ public class UserService {
         logger.info("login user ...{} ", uri.toString());
         HttpHeaders headerForKeycloak = getHeaderForKeycloak();
         HttpEntity httpEntity = new HttpEntity(body, headerForKeycloak);
-        ResponseEntity<String> result = restTemplate.postForEntity(uri,httpEntity,String.class);
-        return result;
+
+        try {
+            ResponseEntity<String> result = restTemplate.postForEntity(uri, httpEntity, String.class);
+            return result;
+        } catch (Exception e) {
+            logger.error("Error while calling RC UM to login by OTP", e);
+            throw new LoginFailedException("Failed to login through RC UM", ErrorCode.RC_UM_301, e.getMessage());
+        }
     }
 
     public ResponseEntity<String> paymentRedirect(Map<String, String> requestData) throws URISyntaxException, IOException {

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.tarento.upsmf.userManagement.exception.InvalidInputException;
+import com.tarento.upsmf.userManagement.exception.UserCreationException;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -59,6 +62,11 @@ public class KeycloakUserCreator {
     }
     public String createUser(final JsonNode request) throws IOException {
         JsonNode body = request.get("request");
+
+        if (body.get("email") == null || (body.get("email").asText() != null && body.get("email").asText().isBlank())) {
+            throw new InvalidInputException("Invalid mail id", ErrorCode.CE_UM_002, "Mail id missing or empty");
+        }
+
         String keycloakBaseUrl = KEYCLOAK_USER_BASE_URL;
         logger.info("keycloakBaseUrl: " ,keycloakBaseUrl);
         JsonNode adminToken = keycloakTokenRetriever.getAdminToken();
@@ -69,8 +77,8 @@ public class KeycloakUserCreator {
         httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         httpPost.setHeader(HttpHeaders.ACCEPT, "application/json");
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8");
-        String userName = UUID.randomUUID().toString();
-        ((ObjectNode)body).put("username",userName);
+//        String userName = UUID.randomUUID().toString();
+        ((ObjectNode)body).put("username",body.get("email"));
         logger.info("Request body: {}", body);
         StringEntity entity = new StringEntity(body.toPrettyString());
         httpPost.setEntity(entity);
@@ -84,7 +92,7 @@ public class KeycloakUserCreator {
             String password = ((ArrayNode)body.get("credentials")).get(0).get("value").asText();
             responseBody = location;
             try {
-                logger.info("syncing user {} with pwd {}",userName,password);
+                logger.info("syncing user {} with pwd {}", body.get("email"), password);
                 String email = body.get("email").asText();
                 String strResponse = keycloakUserCredentialPersister.persistUserInfo(email, password);
                 JsonNode mailPayLoad = mapper.createObjectNode();
@@ -95,6 +103,13 @@ public class KeycloakUserCreator {
                 keycloakUserCredentialPersister.sendUserCreateMail(mailPayLoad);
             }catch (Exception ex){
                 logger.error("error occurred.",ex);
+            }
+        } else {
+            if (response.getStatusLine().getStatusCode() == 409) {
+                throw new UserCreationException("User conflict with existing details", ErrorCode.CE_UM_003,
+                        responseBody);
+            } else {
+                throw new UserCreationException("User creation failed", ErrorCode.CE_UM_001, responseBody);
             }
         }
         logger.info("ResponseBody {}", responseBody);

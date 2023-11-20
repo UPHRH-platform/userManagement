@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.tarento.upsmf.userManagement.exception.RcUserManagementException;
+import com.tarento.upsmf.userManagement.exception.UserCreationException;
 import com.tarento.upsmf.userManagement.model.Transaction;
 import com.tarento.upsmf.userManagement.services.UserService;
 import com.tarento.upsmf.userManagement.utility.*;
@@ -41,6 +43,19 @@ public class UserHandler {
     private ObjectMapper mapper = new ObjectMapper();
     public String createUser(final JsonNode body) throws URISyntaxException, IOException {
         logger.info("creating user with payload {} ", body.toPrettyString());
+
+        Boolean isUserExist = userService.isUserExistInRCUM(body);
+
+        if (isUserExist == null) {
+            throw new RcUserManagementException("Unable to recieve user existence status", ErrorCode.RC_UM_004,
+                    "Unable to recive proper response while calling rc to check user exist");
+        }
+
+        if (Boolean.TRUE.equals(isUserExist)) {
+            throw new UserCreationException("User already exist in RC", ErrorCode.RC_UM_003,
+                    "User already exist in RC UM database");
+        }
+
         String response = keycloakUserCreator.createUser(body);
         logger.info("user created ? {}", response);
         try {

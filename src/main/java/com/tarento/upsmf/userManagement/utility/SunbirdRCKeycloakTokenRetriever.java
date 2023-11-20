@@ -2,6 +2,7 @@ package com.tarento.upsmf.userManagement.utility;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tarento.upsmf.userManagement.exception.KeycloakTokenException;
 import com.tarento.upsmf.userManagement.services.UserService;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -84,11 +85,12 @@ public class SunbirdRCKeycloakTokenRetriever {
         String responseBody = EntityUtils.toString(httpEntity, StandardCharsets.UTF_8);
 
         if (response.getStatusLine().getStatusCode() == 200) {
-            System.out.println("Access token obtained successfully.");
-            System.out.println("Response: " + responseBody);
+            logger.info("Access token obtained successfully.");
+            logger.info("Response: " + responseBody);
         } else {
-            System.out.println("Failed to obtain access token.");
-            System.out.println("Response: " + responseBody);
+            logger.error("Failed to obtain access token. - Response Body: " + responseBody);
+            throw new KeycloakTokenException("Unable to generate admin access token", ErrorCode.CE_UM_101,
+                    "Check keycloak client configuration");
         }
 
         logger.info("Response body: {}", responseBody);

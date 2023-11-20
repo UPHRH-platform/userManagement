@@ -1,6 +1,7 @@
 package com.tarento.upsmf.userManagement.utility;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.tarento.upsmf.userManagement.exception.LoginFailedException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -47,7 +48,8 @@ public class KeycloakUserGetter {
         String userEndpoint = KEYCLOAK_USER_BASE_URL;
         logger.info("userEndpoint: " ,userEndpoint);
         if(userID != null ) {
-            userEndpoint = userEndpoint + "/" + userID;
+//            userEndpoint = userEndpoint + "/" + userID;
+            userEndpoint = userEndpoint + "?username=" + userID + "&exact=true";
         } else {
             String parameter = "?first=%s&max=%s";
             parameter = String.format(parameter,offset,size);
@@ -66,6 +68,13 @@ public class KeycloakUserGetter {
         httpGet.setHeader(HttpHeaders.ACCEPT, "application/json");
 
         org.apache.http.HttpResponse response = httpClient.execute(httpGet);
+
+        if (response.getStatusLine().getStatusCode() == 404) {
+            logger.error("User is not available in keycloak");
+            throw new LoginFailedException("User does not exist", ErrorCode.CE_UM_003,
+                    "Unable to find user in keycloak");
+        }
+
         String responseBody = EntityUtils.toString(response.getEntity());
         logger.info("ResponseBody {}", responseBody);
         return responseBody;

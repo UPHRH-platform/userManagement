@@ -1,6 +1,7 @@
 package com.tarento.upsmf.userManagement.utility;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.tarento.upsmf.userManagement.exception.LoginFailedException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -111,20 +112,38 @@ public class KeycloakUserCredentialPersister {
     }
 
     public String usrLogin(JsonNode body) throws IOException {
-        logger.info("login user endpoint {}. ",USER_LOGIN);
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpPost httpPost = new HttpPost(USER_LOGIN);
-        JsonNode adminToken = sunbirdRCKeycloakTokenRetriever.getAdminToken();
-        String authToken = adminToken.get("access_token").asText();
-        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + authToken);
-        logger.info("payload login user with body {} and header {}", body, httpPost);
-        StringEntity entity = new StringEntity(body.toPrettyString());
-        httpPost.setEntity(entity);
-        org.apache.http.HttpResponse response = httpClient.execute(httpPost);
-        logger.info("Response from server {}",response);
-        String responseBody = EntityUtils.toString(response.getEntity());
-        return responseBody;
+        try {
+            logger.info("login user endpoint {}. ", USER_LOGIN);
+            HttpClient httpClient = HttpClients.createDefault();
+            HttpPost httpPost = new HttpPost(USER_LOGIN);
+            JsonNode adminToken = sunbirdRCKeycloakTokenRetriever.getAdminToken();
+            String authToken = adminToken.get("access_token").asText();
+            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+            httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + authToken);
+            logger.info("payload login user with body {} and header {}", body, httpPost);
+            StringEntity entity = new StringEntity(body.toPrettyString());
+            httpPost.setEntity(entity);
+            org.apache.http.HttpResponse response = httpClient.execute(httpPost);
+            logger.info("Response from server {}", response);
+            String responseBody = EntityUtils.toString(response.getEntity());
+
+            if (response.getStatusLine().getStatusCode() == 500) {
+                logger.error("Error while trying to login in RC User Management");
+                throw new LoginFailedException("Invalid user credential - login failed in RC UM", ErrorCode.RC_UM_301,
+                        responseBody);
+            }
+
+            if (response.getStatusLine().getStatusCode() == 400) {
+                logger.error("Error while trying to login in - Credentials have authorization issue - check password");
+                throw new LoginFailedException("Credentials have authorization issue - login failed in RC UM", ErrorCode.RC_UM_301,
+                        responseBody);
+            }
+
+            return responseBody;
+        } catch (Exception e) {
+            logger.error("Error while tring to login with password");
+            throw new LoginFailedException("Error while tring to login with password", ErrorCode.CE_UM_301, e.getMessage());
+        }
     }
 
 }
