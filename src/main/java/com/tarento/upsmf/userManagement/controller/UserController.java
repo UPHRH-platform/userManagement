@@ -39,6 +39,22 @@ public class UserController {
         return userHandler.userDetails(body);
     }
 
+    /**
+     * @param body
+     * @return
+     * @throws URISyntaxException
+     * @throws IOException
+     */
+    @PostMapping(value = "/detailsById", consumes = "application/json", produces = "application/json")
+    public String userDetailsId(@RequestBody final JsonNode body) throws URISyntaxException, IOException {
+        return userHandler.userDetailsById(body);
+    }
+
+    @PostMapping(value = "/isUserExist", consumes = "application/json", produces = "application/json")
+    public String isUserExist(@RequestBody final JsonNode body) throws URISyntaxException, IOException {
+        return userHandler.userDetailsById(body);
+    }
+
     @PostMapping(value = "/emaildetails", consumes = "application/json", produces = "application/json")
     public String userEmailDetails(@RequestBody final JsonNode body) throws URISyntaxException, IOException {
         return userHandler.userEmailDetails(body);

@@ -80,6 +80,48 @@ public class KeycloakUserGetter {
         return responseBody;
     }
 
+    /**
+     * @param userID
+     * @param offset
+     * @param size
+     * @return
+     * @throws IOException
+     */
+    public String findUserById(final String userID, final int offset, final int size) throws IOException {
+        String userEndpoint = KEYCLOAK_USER_BASE_URL;
+        logger.info("userEndpoint: " ,userEndpoint);
+        if(userID != null ) {
+            userEndpoint = userEndpoint + "/" + userID;
+        } else {
+            String parameter = "?first=%s&max=%s";
+            parameter = String.format(parameter,offset,size);
+            userEndpoint = userEndpoint + parameter;
+        }
+        logger.info("userEndpoint {} after adding userId : " ,userEndpoint);
+        JsonNode adminToken = keycloakTokenRetriever.getAdminToken();
+        logger.info("adminToken: {}" ,adminToken);
+        String accessToken = adminToken.get("access_token").asText();
+        logger.info("accessToken: {}" ,accessToken);
+
+        HttpClient httpClient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(userEndpoint);
+
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        httpGet.setHeader(HttpHeaders.ACCEPT, "application/json");
+
+        org.apache.http.HttpResponse response = httpClient.execute(httpGet);
+
+        if (response.getStatusLine().getStatusCode() == 404) {
+            logger.error("User is not available in keycloak");
+            throw new LoginFailedException("User does not exist", ErrorCode.CE_UM_003,
+                    "Unable to find user in keycloak");
+        }
+
+        String responseBody = EntityUtils.toString(response.getEntity());
+        logger.info("ResponseBody {}", responseBody);
+        return responseBody;
+    }
+
     public String findUserByEmail(final String fieldName, final String fieldValue) throws IOException {
         String userEndpoint = KEYCLOAK_USER_BASE_URL;
         logger.info("userEndpoint: " ,userEndpoint);

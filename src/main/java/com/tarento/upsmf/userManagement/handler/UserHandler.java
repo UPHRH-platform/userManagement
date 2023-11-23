@@ -89,6 +89,17 @@ public class UserHandler {
         return userName;
     }
 
+    /**
+     * @param body
+     * @return
+     * @throws IOException
+     */
+    public String userDetailsById(final JsonNode body) throws IOException {
+        JsonNode request = body.get("request");
+        String userName = keycloakUserGetter.findUserById(request.get("userName").asText(),0,0);
+        return userName;
+    }
+
     public String userEmailDetails(final JsonNode body) throws IOException {
         JsonNode request = body.get("request");
         String userName = keycloakUserGetter.findUserByEmail(request.get("fieldName").asText(), request.get("fieldValue").asText());
