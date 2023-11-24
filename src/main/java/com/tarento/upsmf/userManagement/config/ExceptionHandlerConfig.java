@@ -46,8 +46,8 @@ public class ExceptionHandlerConfig {
 
     private Map<String, Object> generateErrorMap(CustomException exception) {
         Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("error_code", exception.getErrorCode().name());
-        errorResponse.put("error_message", exception.getMessage());
+        errorResponse.put("code", exception.getErrorCode().name());
+        errorResponse.put("error", exception.getMessage());
         errorResponse.put("description", exception.getDescription());
         return errorResponse;
     }

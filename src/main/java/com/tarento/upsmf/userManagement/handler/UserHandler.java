@@ -52,7 +52,7 @@ public class UserHandler {
         }
 
         if (Boolean.TRUE.equals(isUserExist)) {
-            throw new UserCreationException("User already exist in RC", ErrorCode.RC_UM_003,
+            throw new UserCreationException("User already exist in system", ErrorCode.RC_UM_003,
                     "User already exist in RC UM database");
         }
 

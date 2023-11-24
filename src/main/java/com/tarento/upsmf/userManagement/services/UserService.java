@@ -1,12 +1,10 @@
 package com.tarento.upsmf.userManagement.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.tarento.upsmf.userManagement.exception.InvalidInputException;
-import com.tarento.upsmf.userManagement.exception.LoginFailedException;
-import com.tarento.upsmf.userManagement.exception.RcUserManagementException;
-import com.tarento.upsmf.userManagement.exception.UserCreationException;
+import com.tarento.upsmf.userManagement.exception.*;
 import com.tarento.upsmf.userManagement.model.Transaction;
 import com.tarento.upsmf.userManagement.repository.TransactionRepository;
 import com.tarento.upsmf.userManagement.utility.*;
@@ -57,6 +55,8 @@ public class UserService {
 
     @Autowired
     private KeycloakUserCount keycloakUserCount;
+    @Autowired
+    private ErrorMessageProcessor errorMessageProcessor;
 
     private static Environment environment;
     private String BASE_URL;
@@ -197,9 +197,10 @@ public class UserService {
 
         try {
             ResponseEntity<String> result = restTemplate.postForEntity(uri, httpEntity, String.class);
+            errorMessageProcessor.processOtpMessage(result.getBody());
             return result;
         } catch (Exception e) {
-            throw new RcUserManagementException("Unable to get token from RC_UM", ErrorCode.RC_UM_101, e.getMessage());
+            throw new RcUserManagementException(e.getMessage(), ErrorCode.RC_UM_201, "Error while generating otp in RC UM");
         }
     }
 
@@ -240,10 +241,11 @@ public class UserService {
 
         try {
             ResponseEntity<String> result = restTemplate.postForEntity(uri, httpEntity, String.class);
+            errorMessageProcessor.processCredentialMessage(result.getBody());
             return result;
         } catch (Exception e) {
             logger.error("Error while calling RC UM to login by OTP", e);
-            throw new LoginFailedException("Failed to login through RC UM", ErrorCode.RC_UM_301, e.getMessage());
+            throw new LoginFailedException(e.getMessage(), ErrorCode.RC_UM_301, "Error while trying to login");
         }
     }
 

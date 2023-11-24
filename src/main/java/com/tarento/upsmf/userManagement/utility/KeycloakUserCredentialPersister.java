@@ -1,6 +1,7 @@
 package com.tarento.upsmf.userManagement.utility;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.tarento.upsmf.userManagement.exception.ErrorMessageProcessor;
 import com.tarento.upsmf.userManagement.exception.LoginFailedException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
@@ -33,6 +34,9 @@ public class KeycloakUserCredentialPersister {
 
     @Autowired
     private SunbirdRCKeycloakTokenRetriever sunbirdRCKeycloakTokenRetriever;
+
+    @Autowired
+    private ErrorMessageProcessor errorMessageProcessor;
 
     private static Environment environment;
 
@@ -126,23 +130,25 @@ public class KeycloakUserCredentialPersister {
             org.apache.http.HttpResponse response = httpClient.execute(httpPost);
             logger.info("Response from server {}", response);
             String responseBody = EntityUtils.toString(response.getEntity());
+            errorMessageProcessor.processCredentialMessage(responseBody);
 
             if (response.getStatusLine().getStatusCode() == 500) {
                 logger.error("Error while trying to login in RC User Management");
-                throw new LoginFailedException("Invalid user credential - login failed in RC UM", ErrorCode.RC_UM_301,
+                throw new LoginFailedException("Credentials have authorization issue", ErrorCode.RC_UM_301,
                         responseBody);
             }
 
             if (response.getStatusLine().getStatusCode() == 400) {
                 logger.error("Error while trying to login in - Credentials have authorization issue - check password");
-                throw new LoginFailedException("Credentials have authorization issue - login failed in RC UM", ErrorCode.RC_UM_301,
+                throw new LoginFailedException("Invalid user credentials", ErrorCode.RC_UM_301,
                         responseBody);
             }
 
             return responseBody;
         } catch (Exception e) {
             logger.error("Error while tring to login with password");
-            throw new LoginFailedException("Error while tring to login with password", ErrorCode.CE_UM_301, e.getMessage());
+            throw new LoginFailedException(e.getMessage(), ErrorCode.CE_UM_301,
+                    "Error while trying to login with cridentials");
         }
     }
 
