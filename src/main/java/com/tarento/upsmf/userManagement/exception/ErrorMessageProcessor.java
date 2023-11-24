@@ -53,7 +53,7 @@ public class ErrorMessageProcessor {
         JsonNode responseNode = null;
 
         try {
-            if (!response.contains("\"code\":\"400\"")) {
+            if (!response.contains("\"code\":\"RC_UM_400\"")) {
                 return;
             }
 
