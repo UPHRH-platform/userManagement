@@ -4,7 +4,7 @@ echo "Docker build script"
 set -eo pipefail
 
 build_tag=$1
-name=central_usermanagement_service
+name=central-usermanagement-service
 node=$2
 org=$3
 
