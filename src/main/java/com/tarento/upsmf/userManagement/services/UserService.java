@@ -102,9 +102,12 @@ public class UserService {
         try {
             logger.info("Creating user...{} ", body.toPrettyString());
             URI uri1 = new URI(BASE_URL + "/user/v1/sso/create");
+            logger.info("URI1 - {}", uri1);
             HttpHeaders headers = getHeader();
+            logger.info("Request headers - {}", headers);
             HttpEntity<JsonNode> httpEntity = new HttpEntity(body, headers);
             ResponseEntity<JsonNode> result = restTemplate.postForEntity(uri1, httpEntity, JsonNode.class);
+            logger.info("result - {}", result);
             return result;
         } catch (Exception e) {
             throw new UserCreationException("User creation failed for sso", ErrorCode.CE_UM_001, e.getMessage());
