@@ -46,7 +46,7 @@ public class KeycloakUserGetter {
     }
     public String findUser(final String userID, final int offset, final int size) throws IOException {
         String userEndpoint = KEYCLOAK_USER_BASE_URL;
-        logger.info("userEndpoint: " ,userEndpoint);
+        logger.info("userEndpoint: {}" ,userEndpoint);
         if(userID != null ) {
 //            userEndpoint = userEndpoint + "/" + userID;
             userEndpoint = userEndpoint + "?username=" + userID + "&exact=true";
@@ -55,7 +55,7 @@ public class KeycloakUserGetter {
             parameter = String.format(parameter,offset,size);
             userEndpoint = userEndpoint + parameter;
         }
-        logger.info("userEndpoint {} after adding userId : " ,userEndpoint);
+        logger.info("userEndpoint {} after adding userId : {}" ,userEndpoint, userID);
         JsonNode adminToken = keycloakTokenRetriever.getAdminToken();
         logger.info("adminToken: {}" ,adminToken);
         String accessToken = adminToken.get("access_token").asText();
