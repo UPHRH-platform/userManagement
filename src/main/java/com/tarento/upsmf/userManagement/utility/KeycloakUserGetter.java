@@ -68,7 +68,7 @@ public class KeycloakUserGetter {
         httpGet.setHeader(HttpHeaders.ACCEPT, "application/json");
 
         org.apache.http.HttpResponse response = httpClient.execute(httpGet);
-
+        logger.info("HTTP response - {}", response);
         if (response.getStatusLine().getStatusCode() == 404) {
             logger.error("User is not available in keycloak");
             throw new LoginFailedException("User does not exist", ErrorCode.CE_UM_003,
