@@ -98,7 +98,7 @@ public class KeycloakUserGetter {
             userEndpoint = userEndpoint + parameter;
         }
         logger.info("userEndpoint {} after adding userId : " ,userEndpoint);
-        JsonNode adminToken = keycloakTokenRetriever.getAdminTokenRead();
+        JsonNode adminToken = keycloakTokenRetriever.getAdminToken();
         logger.info("adminToken: {}" ,adminToken);
         String accessToken = adminToken.get("access_token").asText();
         logger.info("accessToken: {}" ,accessToken);

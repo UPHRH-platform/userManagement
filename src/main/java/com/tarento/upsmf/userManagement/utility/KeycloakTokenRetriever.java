@@ -2,7 +2,6 @@ package com.tarento.upsmf.userManagement.utility;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tarento.upsmf.userManagement.services.UserService;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -65,31 +64,6 @@ public class KeycloakTokenRetriever {
             "&grant_type=client_credentials" +
             "&client_id=admin-cli" +
             "&client_secret=" + ADMIN_TOKEN_SECRET;
-        logger.info("Request body: {}", requestBody);
-
-        StringEntity entity = new StringEntity(requestBody);
-        httpPost.setEntity(entity);
-
-        org.apache.http.HttpResponse response = httpClient.execute(httpPost);
-        String responseBody = EntityUtils.toString(response.getEntity());
-        JsonNode jsonNode = mapper.readTree(responseBody);
-
-        return jsonNode;
-    }
-
-    public JsonNode getAdminTokenRead() throws IOException {
-        String tokenEndpoint = ADMIN_TOKEN_ENDPOINT;
-        logger.info("Token endpoint: {}" ,tokenEndpoint);
-
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpPost httpPost = new HttpPost(tokenEndpoint);
-        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
-
-        String requestBody = "username=" + ADMIN_USERNAME +
-                "&password=" + ADMIN_PASSWORD +
-                "&grant_type=password" +
-                "&client_id=admin-cli" +
-                "&client_secret=" + ADMIN_TOKEN_SECRET;
         logger.info("Request body: {}", requestBody);
 
         StringEntity entity = new StringEntity(requestBody);
