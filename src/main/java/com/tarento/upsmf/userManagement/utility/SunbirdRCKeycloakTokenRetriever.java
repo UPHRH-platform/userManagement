@@ -69,7 +69,7 @@ public class SunbirdRCKeycloakTokenRetriever {
         HttpPost httpPost = new HttpPost(tokenEndpoint);
 
         String requestBody = "username=" + ADMIN_USERNAME +
-                "&grant_type=client_credentials" +
+                "&grant_type=password" +
                 "&client_id=" + ADMIN_CLIENTID +
                 "&client_secret=" + ADMIN_TOKEN_SECRET;
 
