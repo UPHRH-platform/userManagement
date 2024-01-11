@@ -51,6 +51,7 @@ public class KeycloakTokenRetriever {
     public static String getPropertyValue(String property){
         return environment.getProperty(property);
     }
+
     public JsonNode getAdminToken() throws IOException {
         String tokenEndpoint = ADMIN_TOKEN_ENDPOINT;
         logger.info("Token endpoint: {}" ,tokenEndpoint);
