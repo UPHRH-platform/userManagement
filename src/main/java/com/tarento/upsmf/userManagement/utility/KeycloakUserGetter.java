@@ -45,6 +45,7 @@ public class KeycloakUserGetter {
         return environment.getProperty(property);
     }
     public String findUser(final String userID, final int offset, final int size) throws IOException {
+        logger.info("Calling Method - KeycloakUserGetter || findUser");
         String userEndpoint = KEYCLOAK_USER_BASE_URL;
         logger.info("userEndpoint: {}" ,userEndpoint);
         if(userID != null ) {
@@ -56,7 +57,7 @@ public class KeycloakUserGetter {
             userEndpoint = userEndpoint + parameter;
         }
         logger.info("userEndpoint {} after adding userId : {}" ,userEndpoint, userID);
-        JsonNode adminToken = keycloakTokenRetriever.getAdminToken();
+        JsonNode adminToken = keycloakTokenRetriever.getAdminTokenRead();
         logger.info("adminToken: {}" ,adminToken);
         String accessToken = adminToken.get("access_token").asText();
         logger.info("accessToken: {}" ,accessToken);
@@ -88,6 +89,7 @@ public class KeycloakUserGetter {
      * @throws IOException
      */
     public String findUserById(final String userID, final int offset, final int size) throws IOException {
+        logger.info("Calling Method - KeycloakUserGetter || findUserById");
         String userEndpoint = KEYCLOAK_USER_BASE_URL;
         logger.info("userEndpoint: " ,userEndpoint);
         if(userID != null ) {
@@ -111,6 +113,7 @@ public class KeycloakUserGetter {
 
         org.apache.http.HttpResponse response = httpClient.execute(httpGet);
 
+        logger.info(" response : {}", response);
         if (response.getStatusLine().getStatusCode() == 404) {
             logger.error("User is not available in keycloak");
             throw new LoginFailedException("User does not exist", ErrorCode.CE_UM_003,
@@ -123,6 +126,7 @@ public class KeycloakUserGetter {
     }
 
     public String findUserByEmail(final String fieldName, final String fieldValue) throws IOException {
+        logger.info("Calling Method - KeycloakUserGetter || findUserByEmail");
         String userEndpoint = KEYCLOAK_USER_BASE_URL;
         logger.info("userEndpoint: " ,userEndpoint);
         if(fieldName != null && fieldValue!= null ) {
@@ -134,7 +138,7 @@ public class KeycloakUserGetter {
             }
 
             logger.info("userEndpoint {} after adding email : " ,userEndpoint);
-            JsonNode adminToken = keycloakTokenRetriever.getAdminToken();
+            JsonNode adminToken = keycloakTokenRetriever.getAdminTokenRead();
             logger.info("adminToken: {}" ,adminToken);
             String accessToken = adminToken.get("access_token").asText();
             logger.info("accessToken: {}" ,accessToken);
@@ -146,6 +150,7 @@ public class KeycloakUserGetter {
             httpGet.setHeader(HttpHeaders.ACCEPT, "application/json");
 
             org.apache.http.HttpResponse response = httpClient.execute(httpGet);
+            logger.info(" response : {}", response);
             logger.info("url to be hit {} ",httpGet.toString());
             String responseBody = EntityUtils.toString(response.getEntity());
             logger.info("ResponseBody {}", responseBody);
