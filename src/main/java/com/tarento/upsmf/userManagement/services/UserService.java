@@ -91,7 +91,8 @@ public class UserService {
     private HttpHeaders getHeaderForKeycloak() throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        JsonNode adminToken = sunbirdRCKeycloakTokenRetriever.getAdminToken();
+        //JsonNode adminToken = sunbirdRCKeycloakTokenRetriever.getAdminToken();
+        JsonNode adminToken = keycloakTokenRetriever.getAdminToken();
         String authToken = adminToken.get("access_token").asText();
         headers.add("Authorization","Bearer " + authToken);
         logger.info("Getting keycloak headers...{} ", headers);
