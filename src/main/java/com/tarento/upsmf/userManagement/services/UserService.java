@@ -231,6 +231,7 @@ public class UserService {
             logger.info("RC response - {}", result);
             return result.getBody();
         } catch (Exception e) {
+            logger.error("Error in finding user in RC", e);
             throw new RcUserManagementException("Unable to check user existence", ErrorCode.RC_UM_004, e.getMessage());
         }
     }
