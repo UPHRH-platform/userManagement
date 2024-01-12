@@ -68,8 +68,8 @@ public class KeycloakUserCreator {
         }
 
         String keycloakBaseUrl = KEYCLOAK_USER_BASE_URL;
-        logger.info("keycloakBaseUrl: " ,keycloakBaseUrl);
-        JsonNode adminToken = keycloakTokenRetriever.getAdminToken();
+        logger.info("keycloakBaseUrl: {}" ,keycloakBaseUrl);
+        JsonNode adminToken = keycloakTokenRetriever.getAdminTokenRead();
         String accessToken = adminToken.get("access_token").asText();
         HttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(keycloakBaseUrl);
