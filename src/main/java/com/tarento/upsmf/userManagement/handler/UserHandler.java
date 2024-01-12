@@ -47,8 +47,8 @@ public class UserHandler {
         Boolean isUserExist = userService.isUserExistInRCUM(body);
 
         if (isUserExist == null) {
-            throw new RcUserManagementException("Unable to recieve user existence status", ErrorCode.RC_UM_004,
-                    "Unable to recive proper response while calling rc to check user exist");
+            throw new RcUserManagementException("Unable to receive user existence status", ErrorCode.RC_UM_004,
+                    "Unable to receive proper response while calling rc to check user exist");
         }
 
         if (Boolean.TRUE.equals(isUserExist)) {
@@ -64,7 +64,7 @@ public class UserHandler {
             user.toString();
         } catch (Exception e){
             //response = e.getLocalizedMessage();
-            logger.error("Error Occured",e);
+            logger.error("Error Occurred",e);
         }
         return response;
     }

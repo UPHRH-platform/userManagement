@@ -215,6 +215,7 @@ public class UserService {
 
         RestTemplate restTemplate = new RestTemplate();
         URI uri = new URI(KEYCLOAK_BASEURL + "/user/exist");
+        logger.info("URI - {}", uri);
         String email = body.get("email").asText();
 
         ObjectNode usernameNode = JsonNodeFactory.instance.objectNode();
@@ -227,9 +228,10 @@ public class UserService {
 
         try {
             ResponseEntity<Boolean> result = restTemplate.postForEntity(uri, httpEntity, Boolean.class);
+            logger.info("RC response - {}", result);
             return result.getBody();
         } catch (Exception e) {
-            throw new RcUserManagementException("Unable to check user existance", ErrorCode.RC_UM_004, e.getMessage());
+            throw new RcUserManagementException("Unable to check user existence", ErrorCode.RC_UM_004, e.getMessage());
         }
     }
 
