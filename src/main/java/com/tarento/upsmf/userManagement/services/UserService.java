@@ -122,6 +122,7 @@ public class UserService {
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
         restTemplate.setRequestFactory(requestFactory);
         URI uri = new URI(BASE_URL + "/user/v1/update");
+        logger.info(" keycloak user update - URI - {}", uri);
         HttpHeaders headers = getHeader();
         HttpEntity<JsonNode> httpEntity = new HttpEntity<>(body, headers);
         ResponseEntity<JsonNode> result = restTemplate.exchange(uri, HttpMethod.PATCH, httpEntity, JsonNode.class);
