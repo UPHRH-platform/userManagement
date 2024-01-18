@@ -47,7 +47,7 @@ public class KeycloakUserActivateDeActivate {
     public String activateDeactivatUser(final String userName, boolean activate) throws IOException {
         String userEndpoint = KEYCLOAK_USER_BASE_URL + "/" + userName;
         logger.info("User {} is being activated ? : {} with userEndPoint : {}",userName, activate, userEndpoint);
-        JsonNode adminToken = keycloakTokenRetriever.getAdminToken();
+        JsonNode adminToken = keycloakTokenRetriever.getAdminTokenForWriteOperations();
         String accessToken = adminToken.get("access_token").asText();
 
         HttpClient httpClient = HttpClients.createDefault();
