@@ -62,6 +62,7 @@ public class KeycloakUserCreator {
     }
     public String createUser(final JsonNode request) throws IOException {
         JsonNode body = request.get("request");
+        String moduleNameFromRequest = getModuleNameFromRequest(body);
 
         if (body.get("email") == null || (body.get("email").asText() != null && body.get("email").asText().isBlank())) {
             throw new InvalidInputException("Invalid mail id", ErrorCode.CE_UM_002, "Mail id missing or empty");
@@ -91,19 +92,17 @@ public class KeycloakUserCreator {
             location = location.substring(location.lastIndexOf("/")+1);
             String password = ((ArrayNode)body.get("credentials")).get(0).get("value").asText();
             responseBody = location;
-            try {
-                logger.info("syncing user {} with pwd {}", body.get("email"), password);
-                String email = body.get("email").asText();
-                String strResponse = keycloakUserCredentialPersister.persistUserInfo(email, password);
-                JsonNode mailPayLoad = mapper.createObjectNode();
-                ((ObjectNode)mailPayLoad).put("firstName",body.get("firstName").asText());
-                ((ObjectNode)mailPayLoad).put("lastName",body.get("lastName").asText());
-                ((ObjectNode)mailPayLoad).put("email",body.get("email").asText());
-                ((ObjectNode)mailPayLoad).put("userId",location);
-                keycloakUserCredentialPersister.sendUserCreateMail(mailPayLoad);
-            }catch (Exception ex){
-                logger.error("error occurred.",ex);
+            // creating user in LERN
+            createUserInED(body, password);
+            // skipping mail sending if module is grievance
+            if(moduleNameFromRequest != null
+                    && moduleNameFromRequest.equalsIgnoreCase("grievance")) {
+                logger.info("skipping mail sending for grievance module");
+                logger.info("ResponseBody {}", responseBody);
+                return responseBody;
             }
+            // sending mail for user creation
+            sendUserCreationMail(body, location);
         } else {
             if (response.getStatusLine().getStatusCode() == 409) {
                 throw new UserCreationException("User conflict with existing details", ErrorCode.CE_UM_003,
@@ -114,5 +113,38 @@ public class KeycloakUserCreator {
         }
         logger.info("ResponseBody {}", responseBody);
         return responseBody;
+    }
+
+    private void createUserInED(JsonNode body, String password) {
+        try {
+            logger.info("syncing user {} with pwd {}", body.get("email"), password);
+            String email = body.get("email").asText();
+            String strResponse = keycloakUserCredentialPersister.persistUserInfo(email, password);
+        }catch (Exception ex){
+            logger.error("error occurred in creating user in sunbird LERN .",ex);
+        }
+    }
+
+    private void sendUserCreationMail(JsonNode body, String location) {
+        try {
+            JsonNode mailPayLoad = mapper.createObjectNode();
+            ((ObjectNode)mailPayLoad).put("firstName", body.get("firstName").asText());
+            ((ObjectNode)mailPayLoad).put("lastName", body.get("lastName").asText());
+            ((ObjectNode)mailPayLoad).put("email", body.get("email").asText());
+            ((ObjectNode)mailPayLoad).put("userId", location);
+            keycloakUserCredentialPersister.sendUserCreateMail(mailPayLoad);
+        }catch (Exception ex){
+            logger.error("error sending mail for user creation.",ex);
+        }
+    }
+
+    private String getModuleNameFromRequest(JsonNode body) {
+        String requestModuleName = null;
+        JsonNode attributes = body.get("attributes");
+        if(attributes != null && !attributes.isNull()
+                && !attributes.isEmpty() && !attributes.get("module").isNull()) {
+            requestModuleName = attributes.get("module").asText();
+        }
+        return requestModuleName;
     }
 }
