@@ -121,7 +121,7 @@ public class KeycloakUserCreator {
             String email = body.get("email").asText();
             String strResponse = keycloakUserCredentialPersister.persistUserInfo(email, password);
         }catch (Exception ex){
-            logger.error("error occurred in creating user in sunbird LERN .",ex);
+            logger.error("error occurred in creating user in sunbird LERN .",ex.getLocalizedMessage());
         }
     }
 
@@ -134,7 +134,7 @@ public class KeycloakUserCreator {
             ((ObjectNode)mailPayLoad).put("userId", location);
             keycloakUserCredentialPersister.sendUserCreateMail(mailPayLoad);
         }catch (Exception ex){
-            logger.error("error sending mail for user creation.",ex);
+            logger.error("error sending mail for user creation.",ex.getLocalizedMessage());
         }
     }
 
