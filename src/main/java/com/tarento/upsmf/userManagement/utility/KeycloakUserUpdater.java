@@ -46,7 +46,7 @@ public class KeycloakUserUpdater {
     }
 
     public String updateUser(final JsonNode requestBody, final String userName) throws IOException {
-        JsonNode adminToken = keycloakTokenRetriever.getAdminToken();
+        JsonNode adminToken = keycloakTokenRetriever.getAdminTokenForWriteOperations();
         logger.info("adminToken: {}" ,adminToken);
         String accessToken = adminToken.get("access_token").asText();
         HttpClient httpClient = HttpClients.createDefault();

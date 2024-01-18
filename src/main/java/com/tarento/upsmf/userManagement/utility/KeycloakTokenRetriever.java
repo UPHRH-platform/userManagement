@@ -34,7 +34,14 @@ public class KeycloakTokenRetriever {
     private String ADMIN_TOKEN_SECRET;
 
     private String ADMIN_USERNAME;
+
     private String ADMIN_PASSWORD;
+
+    private String RC_CLIENT_ID;
+
+    private String RC_TOKEN_ENDPOINT;
+
+    private String RC_TOKEN_SECRET;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -42,9 +49,12 @@ public class KeycloakTokenRetriever {
     public void init(){
         environment = env;
         ADMIN_TOKEN_ENDPOINT = getPropertyValue("adminToken.endPoint");
+        RC_TOKEN_ENDPOINT = getPropertyValue("sunbirdRC.keycloak.adminToken.endPoint");
         ADMIN_TOKEN_SECRET = getPropertyValue("adminToken.clientSecret");
+        RC_TOKEN_SECRET = getPropertyValue("sunbirdRC.keycloak.adminToken.clientSecret");
         ADMIN_USERNAME = getPropertyValue("adminToken.userName");
         ADMIN_PASSWORD = getPropertyValue("adminToken.password");
+        RC_CLIENT_ID = getPropertyValue("sunbirdRC.keycloak.adminToken.clientID");
     }
 
     public static String getPropertyValue(String property){
@@ -89,6 +99,31 @@ public class KeycloakTokenRetriever {
                 "&grant_type=password" +
                 "&client_id=admin-cli" +
                 "&client_secret=" + ADMIN_TOKEN_SECRET;
+        logger.info("Request body: {}", requestBody);
+
+        StringEntity entity = new StringEntity(requestBody);
+        httpPost.setEntity(entity);
+
+        org.apache.http.HttpResponse response = httpClient.execute(httpPost);
+        String responseBody = EntityUtils.toString(response.getEntity());
+        JsonNode jsonNode = mapper.readTree(responseBody);
+
+        return jsonNode;
+    }
+
+    public JsonNode getAdminTokenForWriteOperations() throws IOException {
+        String tokenEndpoint = RC_TOKEN_ENDPOINT;
+        logger.info("Token endpoint: {}" ,tokenEndpoint);
+
+        HttpClient httpClient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(tokenEndpoint);
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
+
+        String requestBody = "username=" + ADMIN_USERNAME +
+                //"&password=" + ADMIN_PASSWORD +
+                "&grant_type=client_credentials" +
+                "&client_id=" + RC_CLIENT_ID +
+                "&client_secret=" + RC_TOKEN_SECRET;
         logger.info("Request body: {}", requestBody);
 
         StringEntity entity = new StringEntity(requestBody);
