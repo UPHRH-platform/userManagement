@@ -294,4 +294,7 @@ public class UserService {
         return result;
     }
 
+    public ResponseEntity<String> logout(String userId) throws IOException {
+        return keycloakUserCredentialPersister.usrLogout(userId);
+    }
 }

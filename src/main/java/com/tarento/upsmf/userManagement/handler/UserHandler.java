@@ -196,4 +196,8 @@ public class UserHandler {
     public ResponseEntity<String> getUserByAttribute(JsonNode body) throws SQLException, IOException, URISyntaxException {
         return userService.getUserListByAttribute(body);
     }
+
+    public ResponseEntity<String> logout(String userId) throws IOException {
+        return userService.logout(userId);
+    }
 }

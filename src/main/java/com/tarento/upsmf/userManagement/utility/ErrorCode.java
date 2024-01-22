@@ -9,6 +9,7 @@ public enum ErrorCode {
     RC_UM_101("Token Inaccessibility - RC User Management"),
     RC_UM_201("Invalid OTP - RC User Management"),
     RC_UM_301("Login failed - RC User Management"),
+    RC_UM_302("Error in terminating user session"),
     RC_UM_0("Undefined - RC User Management"),
 
     CE_UM_001("User creation failed - Central  User Management"),

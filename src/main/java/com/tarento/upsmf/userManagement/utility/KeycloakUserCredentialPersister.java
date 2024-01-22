@@ -2,8 +2,10 @@ package com.tarento.upsmf.userManagement.utility;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.tarento.upsmf.userManagement.exception.LoginFailedException;
+import com.tarento.upsmf.userManagement.exception.LogoutFailedException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
@@ -13,11 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.UUID;
 
 @Component
 @PropertySource({ "classpath:application.properties" })
@@ -44,6 +46,8 @@ public class KeycloakUserCredentialPersister {
 
     private String USER_LOGIN;
 
+    private String USER_LOGOUT;
+
     @PostConstruct
     public void init(){
         environment = env;
@@ -51,6 +55,7 @@ public class KeycloakUserCredentialPersister {
         OTP_MAIL_ENDPOINT = getPropertyValue("otp.mail.endpoint");
         USER_CREATE_MAIL_ENDPOINT = getPropertyValue("user.create.mail.endpoint");
         USER_LOGIN = getPropertyValue("user.login");
+        USER_LOGOUT = getPropertyValue("user.logout");
     }
 
     public static String getPropertyValue(String property){
@@ -146,4 +151,30 @@ public class KeycloakUserCredentialPersister {
         }
     }
 
+    public ResponseEntity<String> usrLogout(String userId) {
+        try {
+            logger.info("login user endpoint {}. ", USER_LOGIN);
+            HttpClient httpClient = HttpClients.createDefault();
+            HttpGet httpGet = new HttpGet(USER_LOGOUT.concat("/").concat(userId));
+            JsonNode adminToken = sunbirdRCKeycloakTokenRetriever.getAdminToken();
+            String authToken = adminToken.get("access_token").asText();
+            httpGet.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + authToken);
+            logger.info("payload logout user with header {}", httpGet);
+            org.apache.http.HttpResponse response = httpClient.execute(httpGet);
+            logger.info("Response from server {}", response);
+            String responseBody = EntityUtils.toString(response.getEntity());
+
+            if (response.getStatusLine().getStatusCode() == 500) {
+                logger.error("Error while trying to logout in RC User Management -- code -- 500");
+                throw new LogoutFailedException("Error in terminating session", ErrorCode.RC_UM_302,
+                        responseBody);
+            }
+
+            return ResponseEntity.ok(responseBody);
+        } catch (Exception e) {
+            logger.error("Error while terminating session");
+            throw new LogoutFailedException("Error while terminating session", ErrorCode.RC_UM_302, e.getMessage());
+        }
+    }
 }

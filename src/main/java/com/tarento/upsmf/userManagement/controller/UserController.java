@@ -124,4 +124,13 @@ public class UserController {
     public ResponseEntity<String> getUserByAttribute(@RequestBody JsonNode body) throws SQLException, IOException, URISyntaxException {
         return userHandler.getUserByAttribute(body);
     }
+
+    @GetMapping(value = "/{userId}/logout", produces = "application/json")
+    public ResponseEntity<?> logout(@PathVariable String userId) {
+        try {
+            return userHandler.logout(userId);
+        } catch (IOException e) {
+            throw new RuntimeException("Error in terminating session");
+        }
+    }
 }
