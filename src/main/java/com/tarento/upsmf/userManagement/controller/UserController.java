@@ -125,10 +125,10 @@ public class UserController {
         return userHandler.getUserByAttribute(body);
     }
 
-    @GetMapping(value = "/{userId}/logout", produces = "application/json")
-    public ResponseEntity<?> logout(@PathVariable String userId) {
+    @PostMapping(value = "/logout", produces = "application/json")
+    public ResponseEntity<?> logout(@RequestBody JsonNode jsonNode) {
         try {
-            return userHandler.logout(userId);
+            return userHandler.logout(jsonNode);
         } catch (IOException e) {
             throw new RuntimeException("Error in terminating session");
         }
