@@ -196,4 +196,17 @@ public class UserHandler {
     public ResponseEntity<String> getUserByAttribute(JsonNode body) throws SQLException, IOException, URISyntaxException {
         return userService.getUserListByAttribute(body);
     }
+
+    public ResponseEntity<String> logout(JsonNode jsonNode) throws IOException {
+        if(jsonNode == null
+                || jsonNode.isNull()
+                || jsonNode.isEmpty()) {
+            return ResponseEntity.badRequest().body("Invalid Request");
+        }
+        String userId = jsonNode.get("userId").asText();
+        if(userId == null || userId.isBlank()) {
+            return ResponseEntity.badRequest().body("Invalid User ID");
+        }
+        return userService.logout(userId);
+    }
 }
