@@ -2,6 +2,7 @@ package com.tarento.upsmf.userManagement.utility;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.tarento.upsmf.userManagement.exception.LoginFailedException;
+import com.tarento.upsmf.userManagement.exception.LogoutFailedException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
