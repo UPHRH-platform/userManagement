@@ -7,6 +7,7 @@ import com.tarento.upsmf.userManagement.exception.InvalidInputException;
 import com.tarento.upsmf.userManagement.exception.LoginFailedException;
 import com.tarento.upsmf.userManagement.exception.RcUserManagementException;
 import com.tarento.upsmf.userManagement.exception.UserCreationException;
+import com.tarento.upsmf.userManagement.model.ResponseDto;
 import com.tarento.upsmf.userManagement.model.Transaction;
 import com.tarento.upsmf.userManagement.repository.TransactionRepository;
 import com.tarento.upsmf.userManagement.utility.*;
@@ -292,7 +293,7 @@ public class UserService {
         return result;
     }
 
-    public ResponseEntity<String> logout(String userId) throws IOException {
+    public ResponseEntity<ResponseDto> logout(String userId) throws LoginFailedException {
         return keycloakUserCredentialPersister.usrLogout(userId);
     }
 

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.tarento.upsmf.userManagement.exception.LogoutFailedException;
 import com.tarento.upsmf.userManagement.exception.RcUserManagementException;
 import com.tarento.upsmf.userManagement.exception.UserCreationException;
+import com.tarento.upsmf.userManagement.model.ResponseDto;
 import com.tarento.upsmf.userManagement.model.Transaction;
 import com.tarento.upsmf.userManagement.services.UserService;
 import com.tarento.upsmf.userManagement.utility.*;
@@ -197,15 +199,15 @@ public class UserHandler {
         return userService.getUserListByAttribute(body);
     }
 
-    public ResponseEntity<String> logout(JsonNode jsonNode) throws IOException {
+    public ResponseEntity<ResponseDto> logout(JsonNode jsonNode) throws LogoutFailedException {
         if(jsonNode == null
                 || jsonNode.isNull()
                 || jsonNode.isEmpty()) {
-            return ResponseEntity.badRequest().body("Invalid Request");
+            throw new LogoutFailedException("Invalid Request", ErrorCode.CE_GR_001, "Invalid Request");
         }
         String userId = jsonNode.get("userId").asText();
         if(userId == null || userId.isBlank()) {
-            return ResponseEntity.badRequest().body("Invalid User ID");
+            throw new LogoutFailedException("Invalid User Details", ErrorCode.CE_GR_002, "Invalid User Details");
         }
         return userService.logout(userId);
     }

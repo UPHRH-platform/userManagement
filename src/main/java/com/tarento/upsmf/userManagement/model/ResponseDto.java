@@ -25,6 +25,14 @@ public class ResponseDto {
         this.params = new ResponseParams();
     }
 
+    public ResponseDto(HttpStatus responseCode, Map<String, Object> response) {
+        this.responseCode = responseCode;
+        this.response = response;
+        this.ver = "v1";
+        this.ts = String.valueOf(new Timestamp(System.currentTimeMillis()));
+        this.params = new ResponseParams();
+    }
+
     public ResponseDto(String id) {
         this();
         this.id = id;

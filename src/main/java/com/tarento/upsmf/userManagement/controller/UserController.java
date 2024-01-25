@@ -127,10 +127,6 @@ public class UserController {
 
     @PostMapping(value = "/logout", produces = "application/json")
     public ResponseEntity<?> logout(@RequestBody JsonNode jsonNode) {
-        try {
-            return userHandler.logout(jsonNode);
-        } catch (IOException e) {
-            throw new RuntimeException("Error in terminating session");
-        }
+        return userHandler.logout(jsonNode);
     }
 }
