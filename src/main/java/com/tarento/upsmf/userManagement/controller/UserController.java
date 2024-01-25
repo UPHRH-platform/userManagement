@@ -1,6 +1,7 @@
 package com.tarento.upsmf.userManagement.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.tarento.upsmf.userManagement.exception.LogoutFailedException;
 import com.tarento.upsmf.userManagement.handler.UserHandler;
 import com.tarento.upsmf.userManagement.model.Transaction;
 import com.tarento.upsmf.userManagement.services.PaymentService;
@@ -126,11 +127,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/logout", produces = "application/json")
-    public ResponseEntity<?> logout(@RequestBody JsonNode jsonNode) {
-        try {
-            return userHandler.logout(jsonNode);
-        } catch (IOException e) {
-            throw new RuntimeException("Error in terminating session");
-        }
+    public ResponseEntity<?> logout(@RequestBody JsonNode jsonNode) throws LogoutFailedException {
+        return userHandler.logout(jsonNode);
     }
 }

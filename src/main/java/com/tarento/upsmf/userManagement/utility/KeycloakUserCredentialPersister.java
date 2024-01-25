@@ -3,6 +3,7 @@ package com.tarento.upsmf.userManagement.utility;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.tarento.upsmf.userManagement.exception.LoginFailedException;
 import com.tarento.upsmf.userManagement.exception.LogoutFailedException;
+import com.tarento.upsmf.userManagement.model.ResponseDto;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -15,11 +16,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @PropertySource({ "classpath:application.properties" })
@@ -151,7 +155,7 @@ public class KeycloakUserCredentialPersister {
         }
     }
 
-    public ResponseEntity<String> usrLogout(String userId) {
+    public ResponseEntity<ResponseDto> usrLogout(String userId) {
         try {
             logger.info("login user endpoint {}. ", USER_LOGIN);
             HttpClient httpClient = HttpClients.createDefault();
@@ -170,8 +174,11 @@ public class KeycloakUserCredentialPersister {
                 throw new LogoutFailedException("Error in terminating session", ErrorCode.RC_UM_302,
                         responseBody);
             }
-
-            return ResponseEntity.ok(responseBody);
+            Map<String, Object> responseMap = new HashMap<>();
+            responseMap.put("code", "200");
+            responseMap.put("message", "Success");
+            ResponseDto responseDto = new ResponseDto(HttpStatus.OK, responseMap);
+            return ResponseEntity.ok().body(responseDto);
         } catch (Exception e) {
             logger.error("Error while terminating session");
             throw new LogoutFailedException("Error while terminating session", ErrorCode.RC_UM_302, e.getMessage());

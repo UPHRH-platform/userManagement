@@ -1,11 +1,11 @@
 package com.tarento.upsmf.userManagement.model;
 
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
-
-import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 
 public class ResponseDto {
@@ -20,6 +20,14 @@ public class ResponseDto {
     private transient Map<String, Object> response = new HashMap<>();
 
     public ResponseDto() {
+        this.ver = "v1";
+        this.ts = String.valueOf(new Timestamp(System.currentTimeMillis()));
+        this.params = new ResponseParams();
+    }
+
+    public ResponseDto(HttpStatus responseCode, Map<String, Object> response) {
+        this.responseCode = responseCode;
+        this.response = response;
         this.ver = "v1";
         this.ts = String.valueOf(new Timestamp(System.currentTimeMillis()));
         this.params = new ResponseParams();

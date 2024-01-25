@@ -17,6 +17,8 @@ public enum ErrorCode {
     CE_UM_003("Keycloak User conflict | User already exist - Central  User Management"),
     CE_UM_101("Failed Admin Token Generation - Central User Management"),
     CE_UM_301("Login failed - Central User Management"),
+    CE_GR_001("Invalid Request"),
+    CE_GR_002("Invalid User Details"),
     CE_UM_0("Undefined - Central User Management");
 
 
