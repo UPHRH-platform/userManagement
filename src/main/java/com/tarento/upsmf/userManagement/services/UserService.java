@@ -25,12 +25,14 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @PropertySource({ "classpath:application.properties" })
@@ -293,8 +295,8 @@ public class UserService {
         return result;
     }
 
-    public ResponseEntity<ResponseDto> logout(String userId) throws LoginFailedException {
-        return keycloakUserCredentialPersister.usrLogout(userId);
+    public ResponseEntity<ResponseDto> logout(String userId, HttpServletRequest httpServletRequest) throws LoginFailedException {
+        return keycloakUserCredentialPersister.usrLogout(userId, httpServletRequest);
     }
 
 }

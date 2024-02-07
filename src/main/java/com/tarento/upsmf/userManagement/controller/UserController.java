@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -126,7 +127,8 @@ public class UserController {
     }
 
     @PostMapping(value = "/logout", produces = "application/json")
-    public ResponseEntity<?> logout(@RequestBody JsonNode jsonNode) {
-        return userHandler.logout(jsonNode);
+    public ResponseEntity<?> logout(@RequestBody JsonNode jsonNode,
+                                    HttpServletRequest httpServletRequest)  {
+        return userHandler.logout(jsonNode, httpServletRequest);
     }
 }

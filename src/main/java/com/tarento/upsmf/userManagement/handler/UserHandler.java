@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -199,7 +200,7 @@ public class UserHandler {
         return userService.getUserListByAttribute(body);
     }
 
-    public ResponseEntity<ResponseDto> logout(JsonNode jsonNode) throws LogoutFailedException {
+    public ResponseEntity<ResponseDto> logout(JsonNode jsonNode, HttpServletRequest httpServletRequest) throws LogoutFailedException {
         if(jsonNode == null
                 || jsonNode.isNull()
                 || jsonNode.isEmpty()) {
@@ -209,6 +210,6 @@ public class UserHandler {
         if(userId == null || userId.isBlank()) {
             throw new LogoutFailedException("Invalid User Details", ErrorCode.CE_GR_002, "Invalid User Details");
         }
-        return userService.logout(userId);
+        return userService.logout(userId, httpServletRequest);
     }
 }
