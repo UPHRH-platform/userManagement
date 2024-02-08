@@ -142,7 +142,7 @@ public class KeycloakUserCreator {
         String requestModuleName = null;
         JsonNode attributes = body.get("attributes");
         if(attributes != null && !attributes.isNull()
-                && !attributes.isEmpty() && !attributes.get("module").isNull()) {
+                && !attributes.isEmpty() && attributes.has("module")) {
             requestModuleName = attributes.get("module").asText();
         }
         return requestModuleName;
