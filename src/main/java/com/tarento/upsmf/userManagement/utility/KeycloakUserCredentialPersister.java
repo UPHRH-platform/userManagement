@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +30,9 @@ import java.util.Map;
 @PropertySource({ "classpath:application.properties" })
 public class KeycloakUserCredentialPersister {
 
+    public static final String HEADER_X_USER_TOKEN = "x-user-token";
+    public static final String HEADER_KEY_AUTHORIZATION = "Authorization";
+    public static final String AUTH_KEY_BEARER = "Bearer";
     private static final Logger logger = LoggerFactory.getLogger(KeycloakUserCredentialPersister.class);
 
     @Autowired
@@ -74,9 +78,9 @@ public class KeycloakUserCredentialPersister {
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + authToken);
         String requestBody = "{" +
-            "\"username\": " + "\"" + userName + "\"" + "," +
-            "\"password\": " + "\"" + password + "\"" +
-        "}";
+                "\"username\": " + "\"" + userName + "\"" + "," +
+                "\"password\": " + "\"" + password + "\"" +
+                "}";
         logger.info("payload to save user info with body {} and header {}",requestBody,httpPost.getAllHeaders());
         StringEntity entity = new StringEntity(requestBody);
         httpPost.setEntity(entity);
@@ -155,8 +159,10 @@ public class KeycloakUserCredentialPersister {
         }
     }
 
-    public ResponseEntity<ResponseDto> usrLogout(String userId) {
+    public ResponseEntity<ResponseDto> usrLogout(String userId, HttpServletRequest httpServletRequest) {
         try {
+            // get user's auth token from request
+            String token = extractUsersAuthToken(httpServletRequest);
             logger.info("login user endpoint {}. ", USER_LOGIN);
             HttpClient httpClient = HttpClients.createDefault();
             HttpGet httpGet = new HttpGet(USER_LOGOUT.concat("/").concat(userId));
@@ -164,6 +170,9 @@ public class KeycloakUserCredentialPersister {
             String authToken = adminToken.get("access_token").asText();
             httpGet.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
             httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + authToken);
+            if(token != null) {
+                httpGet.setHeader(HEADER_X_USER_TOKEN, token);
+            }
             logger.info("payload logout user with header {}", httpGet);
             org.apache.http.HttpResponse response = httpClient.execute(httpGet);
             logger.info("Response from server {}", response);
@@ -174,6 +183,7 @@ public class KeycloakUserCredentialPersister {
                 throw new LogoutFailedException("Error in terminating session", ErrorCode.RC_UM_302,
                         responseBody);
             }
+
             Map<String, Object> responseMap = new HashMap<>();
             responseMap.put("code", "200");
             responseMap.put("message", "Success");
@@ -184,4 +194,24 @@ public class KeycloakUserCredentialPersister {
             throw new LogoutFailedException("Error while terminating session", ErrorCode.RC_UM_302, e.getMessage());
         }
     }
+
+    private String extractUsersAuthToken(HttpServletRequest httpServletRequest) {
+        String authToken = httpServletRequest.getHeader(HEADER_KEY_AUTHORIZATION);
+        if(authToken == null || authToken.isEmpty()) {
+            return null;
+        }
+        logger.info("LOG OUT METHOD - Header Map - auth key {}", authToken);
+        if(authToken.trim().startsWith(AUTH_KEY_BEARER)){
+            logger.info("LOG OUT METHOD - auth key start with Bearer - {}", authToken);
+            int separatorIndex = authToken.trim().indexOf(" ");
+            logger.info("LOG OUT METHOD - auth key start with Bearer - trim bearer | space index - {}", separatorIndex);
+            if(separatorIndex > 0 && separatorIndex < authToken.trim().length()) {
+                authToken = authToken.trim().substring(separatorIndex+1);
+                logger.info("LOG OUT METHOD - auth key start without Bearer - {}", authToken);
+            }
+        }
+        logger.info("LOG OUT METHOD - auth key final - {}", authToken);
+        return authToken;
+    }
+
 }

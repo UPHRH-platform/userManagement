@@ -22,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -292,7 +293,7 @@ public class UserService {
         return result;
     }
 
-    public ResponseEntity<ResponseDto> logout(String userId) throws LogoutFailedException {
-        return keycloakUserCredentialPersister.usrLogout(userId);
+    public ResponseEntity<ResponseDto> logout(String userId, HttpServletRequest httpServletRequest) throws LogoutFailedException {
+        return keycloakUserCredentialPersister.usrLogout(userId, httpServletRequest);
     }
 }
